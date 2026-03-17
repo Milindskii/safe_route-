@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { Shield, Search, Navigation, MapPin, Info, Plus, Minus, RotateCcw, Sun, Moon, ArrowLeft } from 'lucide-react';
+import { Shield, Search, Navigation, MapPin, Info, Plus, Minus, RotateCcw, Sun, Moon, ArrowLeft, X } from 'lucide-react';
 import Link from 'next/link';
 import SafeBot from '../landing/SafeBot';
 
@@ -20,6 +20,7 @@ export default function MapPage() {
   const [searchFrom, setSearchFrom] = useState('');
   const [searchTo, setSearchTo] = useState('');
   const [safetyScore, setSafetyScore] = useState(92);
+  const [isRoutePanelOpen, setIsRoutePanelOpen] = useState(true);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -165,9 +166,16 @@ export default function MapPage() {
         </div>
 
         <div className="pointer-events-auto flex items-center gap-3">
-          <div className="hidden md:flex flex-col items-end mr-2">
-            <span className="font-syne text-[10px] uppercase tracking-tighter text-text-secondary">Current Region</span>
-            <span className="font-playfair text-sm text-text-primary font-bold">New York City, NY</span>
+          <div className="hidden md:flex items-center gap-4 bg-surface/80 backdrop-blur-md border border-border px-4 py-2 rounded-xl shadow-lg">
+            <div className="flex flex-col items-end">
+              <span className="font-syne text-[8px] uppercase tracking-[0.3em] text-accent">Region Dashboard</span>
+              <span className="font-playfair text-sm text-text-primary font-bold">New York City, NY</span>
+            </div>
+            <div className="w-[1px] h-6 bg-border" />
+            <div className="flex flex-col items-start">
+              <span className="font-jetbrains text-[10px] text-safe font-bold uppercase tracking-widest">Connected</span>
+              <span className="font-jetbrains text-[8px] text-text-secondary">Latency: 24ms</span>
+            </div>
           </div>
           <button onClick={toggleTheme} className="bg-surface/80 backdrop-blur-md border border-border p-3 rounded-xl hover:border-accent transition-all shadow-lg group">
             {isDark ? <Sun className="w-5 h-5 text-accent group-hover:rotate-45 transition-transform" /> : <Moon className="w-5 h-5 text-accent group-hover:-rotate-12 transition-transform" />}
@@ -186,59 +194,75 @@ export default function MapPage() {
         >
           <div ref={mapContainer} className="w-full h-full" />
 
-          {/* Floating Search Card */}
-          <div className="absolute top-8 left-8 w-full max-w-sm pointer-events-none">
-            <motion.div 
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="bg-background/90 backdrop-blur-xl p-8 rounded-2xl pointer-events-auto space-y-6 border border-border shadow-2xl"
+          {/* Floating Toggle Button */}
+          <div className="absolute top-8 left-8 z-30 pointer-events-auto">
+            <button 
+              onClick={() => setIsRoutePanelOpen(!isRoutePanelOpen)}
+              className={`p-4 rounded-2xl shadow-2xl transition-all duration-300 flex items-center gap-2 group ${
+                isRoutePanelOpen ? 'bg-accent text-background border-transparent' : 'bg-surface/90 backdrop-blur-xl border border-border text-text-primary'
+              }`}
             >
-              <div className="space-y-1">
-                <h3 className="font-playfair text-xl text-text-primary">Plan Your Route</h3>
-                <p className="text-[10px] uppercase tracking-widest text-text-secondary">AI-Optimized for safety & lighting</p>
-              </div>
-
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-[9px] uppercase tracking-[0.2em] text-text-secondary ml-1">Starting From</label>
-                  <div className="relative group">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary group-focus-within:text-accent transition-colors" />
-                    <input 
-                      type="text" 
-                      placeholder="Enter location..."
-                      value={searchFrom}
-                      onChange={(e) => setSearchFrom(e.target.value)}
-                      className="w-full bg-surface/50 border border-border rounded-xl pl-10 pr-4 py-3 font-jetbrains text-xs text-text-primary focus:outline-none focus:border-accent focus:ring-4 focus:ring-accent/5 transition-all"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex justify-center -my-2 opacity-30">
-                  <div className="w-[1px] h-4 bg-border" />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[9px] uppercase tracking-[0.2em] text-text-secondary ml-1">Destination</label>
-                  <div className="relative group">
-                    <Navigation className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary group-focus-within:text-safe transition-colors" />
-                    <input 
-                      type="text" 
-                      placeholder="Where to?"
-                      value={searchTo}
-                      onChange={(e) => setSearchTo(e.target.value)}
-                      className="w-full bg-surface/50 border border-border rounded-xl pl-10 pr-4 py-3 font-jetbrains text-xs text-text-primary focus:outline-none focus:border-safe focus:ring-4 focus:ring-safe/5 transition-all"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <button className="w-full bg-accent hover:bg-accent-hover text-background font-syne font-bold py-4 rounded-xl shadow-lg shadow-accent/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group">
-                <Search className="w-4 h-4 group-hover:rotate-12 transition-transform" /> 
-                <span className="uppercase tracking-[0.1em] text-xs">Analyze Safety Route</span>
-              </button>
-            </motion.div>
+              {isRoutePanelOpen ? <X className="w-5 h-5" /> : <Search className="w-5 h-5" />}
+              <span className="font-syne text-xs uppercase tracking-widest font-bold">
+                {isRoutePanelOpen ? 'Close Search' : 'Plan Route'}
+              </span>
+            </button>
           </div>
+
+          {/* Floating Search Panel */}
+          <AnimatePresence>
+            {isRoutePanelOpen && (
+              <motion.div 
+                initial={{ x: -100, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -100, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                className="absolute top-28 left-8 w-full max-w-sm pointer-events-auto z-20"
+              >
+                <div className="bg-background/95 backdrop-blur-2xl p-8 rounded-3xl border border-border shadow-[0_20px_50px_rgba(0,0,0,0.5)] space-y-8">
+                  <div className="space-y-1">
+                    <h3 className="font-playfair text-2xl text-text-primary">Plan Your Route</h3>
+                    <p className="text-[10px] uppercase tracking-widest text-text-secondary">Optimized with Community Intelligence</p>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="text-[9px] uppercase tracking-[0.2em] text-text-secondary ml-1">Origin Point</label>
+                      <div className="relative group">
+                        <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary group-focus-within:text-accent transition-colors" />
+                        <input 
+                          type="text" 
+                          placeholder="Your location..."
+                          value={searchFrom}
+                          onChange={(e) => setSearchFrom(e.target.value)}
+                          className="w-full bg-surface/40 border border-border rounded-2xl pl-12 pr-4 py-4 font-jetbrains text-xs text-text-primary focus:outline-none focus:border-accent focus:ring-4 focus:ring-accent/5 transition-all"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[9px] uppercase tracking-[0.2em] text-text-secondary ml-1">Destination</label>
+                      <div className="relative group">
+                        <Navigation className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary group-focus-within:text-safe transition-colors" />
+                        <input 
+                          type="text" 
+                          placeholder="Where to?"
+                          value={searchTo}
+                          onChange={(e) => setSearchTo(e.target.value)}
+                          className="w-full bg-surface/40 border border-border rounded-2xl pl-12 pr-4 py-4 font-jetbrains text-xs text-text-primary focus:outline-none focus:border-safe focus:ring-4 focus:ring-safe/5 transition-all"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <button className="w-full bg-accent hover:bg-accent-hover text-background font-syne font-bold py-5 rounded-2xl shadow-xl shadow-accent/20 transition-all active:scale-[0.98] flex items-center justify-center gap-3 group">
+                    <Search className="w-5 h-5 group-hover:rotate-12 transition-transform" /> 
+                    <span className="uppercase tracking-[0.1em] text-xs">Start AI Analysis</span>
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Safety Score Badge */}
           <div className="absolute bottom-6 left-6 pointer-events-none">
