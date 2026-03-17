@@ -10,55 +10,41 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // CSS Variables for theme switching
-        background: 'var(--background)',
+        background: 'hsl(var(--background) / <alpha-value>)',
         surface: {
-          DEFAULT: 'var(--surface)',
-          hover: 'var(--surface-hover)',
+          DEFAULT: 'hsl(var(--surface) / <alpha-value>)',
+          hover: 'hsl(var(--surface-hover) / <alpha-value>)',
         },
-        border: 'var(--border)',
+        border: 'hsl(var(--border) / <alpha-value>)',
         text: {
-          primary: 'var(--text-primary)',
-          secondary: 'var(--text-secondary)',
+          primary: 'hsl(var(--text-primary) / <alpha-value>)',
+          secondary: 'hsl(var(--text-secondary) / <alpha-value>)',
         },
         accent: {
-          DEFAULT: 'var(--accent)',
-          hover: 'var(--accent-hover)',
-          light: 'var(--accent-light)',
+          DEFAULT: 'hsl(var(--accent) / <alpha-value>)',
+          hover: 'hsl(var(--accent-hover) / <alpha-value>)',
+          light: 'hsl(var(--accent-light) / <alpha-value>)',
         },
-        safe: 'var(--safe)',
-        danger: 'var(--danger)',
-        warning: 'var(--warning)',
-        // Legacy color support (for backward compatibility)
-        primary: {
-          dark: "#0D1B2A",
-          light: "#FAF8F5",
-        },
+        safe: 'hsl(var(--safe) / <alpha-value>)',
+        danger: 'hsl(var(--danger) / <alpha-value>)',
+        warning: 'hsl(var(--warning) / <alpha-value>)',
       },
       fontFamily: {
-        playfair: ["var(--font-playfair)", "Playfair Display", "serif"],
-        syne: ["var(--font-syne)", "Syne", "sans-serif"],
-        lora: ["var(--font-lora)", "Lora", "serif"],
-        jetbrains: ["var(--font-jetbrains)", "JetBrains Mono", "monospace"],
-      },
-      backgroundImage: {
-        'noise': "url('https://www.transparenttextures.com/patterns/asfalt-dark.png')",
+        playfair: ["var(--font-playfair)", "serif"],
+        syne: ["var(--font-syne)", "sans-serif"],
+        lora: ["var(--font-lora)", "serif"],
+        jetbrains: ["var(--font-jetbrains)", "monospace"],
       },
       animation: {
-        'float': 'float 6s ease-in-out infinite',
-        'shimmer': 'shimmer 2s linear infinite',
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'float': 'float 3s ease-in-out infinite',
       },
       keyframes: {
         float: {
           '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-20px)' },
-        },
-        shimmer: {
-          '0%': { transform: 'translateX(-100%)' },
-          '100%': { transform: 'translateX(100%)' },
-        },
-      },
+          '50%': { transform: 'translateY(-10px)' },
+        }
+      }
     },
   },
   plugins: [],

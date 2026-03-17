@@ -426,9 +426,22 @@ export default function LandingPage() {
               </div>
             </motion.div>
 
-            {/* Chatbot Column */}
-            <div className="h-full min-h-[500px]">
-              <SafeBot />
+            {/* Safety Metrics Column */}
+            <div className="bg-background border border-border rounded-2xl p-8 flex flex-col justify-center gap-8">
+              <div className="space-y-4">
+                <h3 className="font-playfair text-2xl text-text-primary">Safety Intelligence</h3>
+                <p className="text-text-secondary text-sm font-lora">Your safety is powered by real-time data analysis and community-driven insights.</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-surface rounded-xl border border-border">
+                  <div className="text-accent font-bold text-xl mb-1">98%</div>
+                  <div className="text-[10px] uppercase tracking-widest text-text-secondary">Data Accuracy</div>
+                </div>
+                <div className="p-4 bg-surface rounded-xl border border-border">
+                  <div className="text-safe font-bold text-xl mb-1">24/7</div>
+                  <div className="text-[10px] uppercase tracking-widest text-text-secondary">Monitoring</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -476,6 +489,7 @@ export default function LandingPage() {
           © 2025 SAFEROUTE TECHNOLOGIES. ALL RIGHTS RESERVED.
         </div>
       </footer>
+      <SafeBot />
     </div>
   );
 }

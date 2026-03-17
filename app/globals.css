@@ -3,41 +3,64 @@
 @tailwind utilities;
 
 @layer base {
-  body {
-    @apply bg-primary-dark text-text-dark;
-  }
-  
-  .dark body {
-    @apply bg-primary-dark text-text-dark;
+  :root {
+    --background: 240 10% 98%;
+    --surface: 240 10% 95%;
+    --surface-hover: 240 10% 90%;
+    --border: 240 5.9% 90%;
+    --text-primary: 240 10% 3.9%;
+    --text-secondary: 240 5.2% 33.9%;
+    --accent: 38 92% 55%;
+    --accent-hover: 38 92% 45%;
+    --accent-light: 38 92% 95%;
+    --safe: 156 46% 48%;
+    --danger: 0 84% 60%;
+    --warning: 38 92% 55%;
   }
 
-  body:not(.dark) {
-    @apply bg-primary-light text-text-light;
+  .dark {
+    --background: 210 40% 11%;
+    --surface: 210 40% 15%;
+    --surface-hover: 210 40% 20%;
+    --border: 210 40% 25%;
+    --text-primary: 210 20% 93%;
+    --text-secondary: 210 15% 75%;
+    --accent: 38 92% 55%;
+    --accent-hover: 38 92% 65%;
+    --accent-light: 38 92% 20%;
+    --safe: 156 46% 48%;
+    --danger: 0 84% 60%;
+    --warning: 38 92% 55%;
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--text-primary));
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
 @layer components {
   .glass-card {
-    @apply backdrop-blur-[20px] border rounded-[14px] shadow-[0_4px_24px_rgba(0,0,0,0.12)];
-  }
-  
-  .dark .glass-card {
-    @apply bg-surface-dark/60 border-accent/10;
-  }
-
-  .glass-card-light {
-    @apply bg-white/70 border-black/5 backdrop-blur-[20px] rounded-[14px] shadow-[0_4px_24px_rgba(0,0,0,0.12)];
+    background-color: hsla(var(--surface) / 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid hsla(var(--border) / 0.5);
+    border-radius: 1rem;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
   }
 
   .btn-primary {
-    @apply bg-accent text-primary-dark font-syne font-semibold tracking-[0.04em] px-7 py-3.5 rounded-lg transition-all duration-300 relative overflow-hidden;
+    background-color: hsl(var(--accent));
+    color: hsl(var(--background));
+    font-family: var(--font-syne);
+    font-weight: 600;
+    padding: 0.875rem 1.75rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
   }
 
-  .input-floating {
-    @apply w-full bg-transparent border border-text-muted/30 rounded-lg px-4 py-3.5 font-lora focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all;
+  .btn-primary:hover {
+    background-color: hsl(var(--accent-hover));
+    transform: scale(1.02);
   }
-}
-
-@layer utilities {
-  .text-balance { text-wrap: balance; }
 }
