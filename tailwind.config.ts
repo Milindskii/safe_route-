@@ -10,27 +10,36 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // CSS Variables for theme switching
+        background: 'var(--background)',
+        surface: {
+          DEFAULT: 'var(--surface)',
+          hover: 'var(--surface-hover)',
+        },
+        border: 'var(--border)',
+        text: {
+          primary: 'var(--text-primary)',
+          secondary: 'var(--text-secondary)',
+        },
+        accent: {
+          DEFAULT: 'var(--accent)',
+          hover: 'var(--accent-hover)',
+          light: 'var(--accent-light)',
+        },
+        safe: 'var(--safe)',
+        danger: 'var(--danger)',
+        warning: 'var(--warning)',
+        // Legacy color support (for backward compatibility)
         primary: {
           dark: "#0D1B2A",
           light: "#FAF8F5",
         },
-        surface: {
-          dark: "#1A2A3A",
-          light: "rgba(255,255,255,0.7)",
-        },
-        accent: "#F5A623",
-        safe: "#4CAF84",
-        text: {
-          dark: "#E8EDF2",
-          light: "#0D1B2A",
-          muted: "#8A9BB0",
-        },
       },
       fontFamily: {
-        playfair: ["var(--font-playfair)", "serif"],
-        syne: ["var(--font-syne)", "sans-serif"],
-        lora: ["var(--font-lora)", "serif"],
-        jetbrains: ["var(--font-jetbrains)", "monospace"],
+        playfair: ["var(--font-playfair)", "Playfair Display", "serif"],
+        syne: ["var(--font-syne)", "Syne", "sans-serif"],
+        lora: ["var(--font-lora)", "Lora", "serif"],
+        jetbrains: ["var(--font-jetbrains)", "JetBrains Mono", "monospace"],
       },
       backgroundImage: {
         'noise': "url('https://www.transparenttextures.com/patterns/asfalt-dark.png')",
@@ -38,6 +47,7 @@ const config: Config = {
       animation: {
         'float': 'float 6s ease-in-out infinite',
         'shimmer': 'shimmer 2s linear infinite',
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
       keyframes: {
         float: {
@@ -53,4 +63,5 @@ const config: Config = {
   },
   plugins: [],
 };
+
 export default config;

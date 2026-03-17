@@ -8,7 +8,7 @@ import { Shield, Search, Navigation, MapPin, Info, Plus, Minus, RotateCcw, Sun, 
 import Link from 'next/link';
 
 // Replace with your actual token
-mapboxgl.accessToken = 'pk.eyJ1Ijoib3BlbmJ1aWxkZXIiLCJhIjoiY204Ym96Z29pMDBqZzJqcHh6Z29pMDBqZCJ9.YOUR_MAPBOX_ACCESS_TOKEN';
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || 'pk.eyJ1Ijoib3BlbmJ1aWxkZXIiLCJhIjoiY204Ym96Z29pMDBqZzJqcHh6Z29pMDBqZCJ9.YOUR_MAPBOX_ACCESS_TOKEN';
 
 const DEFAULT_COORDS: [number, number] = [-74.006, 40.7128]; // NYC
 
@@ -80,7 +80,8 @@ export default function MapPage() {
                 [-74.008, 40.7140],
                 [-74.010, 40.7150]
               ]
-            }
+            },
+            properties: {}
           }
         });
 
