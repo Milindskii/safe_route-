@@ -11,6 +11,11 @@ export default function MapPage() {
   const [searchFrom, setSearchFrom] = useState('');
   const [searchTo, setSearchTo] = useState('Times Square, New York, NY');
   const [safetyScore, setSafetyScore] = useState(92);
+  const [committedRoute, setCommittedRoute] = useState<{ from: string; to: string; safetyScore: number }>(() => ({
+    from: '',
+    to: 'Times Square, New York, NY',
+    safetyScore: 92,
+  }));
   const [mapSrc, setMapSrc] = useState(
     `https://www.google.com/maps?q=Times+Square,New+York,NY&output=embed`
   );
@@ -20,6 +25,7 @@ export default function MapPage() {
     if (!searchTo) return;
 
     let newSrc = '';
+    const newScore = Math.floor(Math.random() * 30) + 70;
     
     if (searchFrom && searchTo) {
       // Show route between two locations
@@ -34,7 +40,8 @@ export default function MapPage() {
 
     setMapSrc(newSrc);
     setMapKey(Date.now()); // Force iframe to reload
-    setSafetyScore(Math.floor(Math.random() * 30) + 70);
+    setSafetyScore(newScore);
+    setCommittedRoute({ from: searchFrom, to: searchTo, safetyScore: newScore });
   };
 
   const handleSampleRoute = () => {
@@ -45,6 +52,7 @@ export default function MapPage() {
     setMapSrc(`https://www.google.com/maps?saddr=${encodeURIComponent(from)}&daddr=${encodeURIComponent(to)}&output=embed`);
     setMapKey(Date.now());
     setSafetyScore(92);
+    setCommittedRoute({ from, to, safetyScore: 92 });
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -214,6 +222,7 @@ export default function MapPage() {
                       const newSrc = `https://www.google.com/maps?q=${encodeURIComponent(place.query)}&output=embed&z=15`;
                       setMapSrc(newSrc);
                       setMapKey(Date.now());
+                      setCommittedRoute((prev) => ({ from: searchFrom, to: place.query, safetyScore: prev.safetyScore }));
                     }}
                     className="px-2.5 py-1.5 bg-surface/40 hover:bg-surface/60 text-text-secondary hover:text-text-primary text-[9px] rounded-md border border-border transition-all"
                   >
@@ -292,7 +301,7 @@ export default function MapPage() {
       </div>
       
       {/* SafeBot - Added exactly as in the first code */}
-      <SafeBot />
+      <SafeBot routeContext={committedRoute} />
     </div>
   );
 }

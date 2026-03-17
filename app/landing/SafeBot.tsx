@@ -13,6 +13,12 @@ interface Message {
 
 type BotMode = 'neighbor' | 'agent' | 'friend';
 
+export type SafeBotRouteContext = {
+  from?: string;
+  to?: string;
+  safetyScore?: number;
+};
+
 const MODE_META: Record<BotMode, { label: string; short: string; placeholder: string; icon: React.ReactNode; greeting: string }> = {
   neighbor: {
     label: 'Travel Neighbour',
@@ -40,7 +46,7 @@ const MODE_META: Record<BotMode, { label: string; short: string; placeholder: st
   },
 };
 
-export default function SafeBot() {
+export default function SafeBot({ routeContext }: { routeContext?: SafeBotRouteContext }) {
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<BotMode>('agent');
   const [isModeMenuOpen, setIsModeMenuOpen] = useState(false);
@@ -59,6 +65,7 @@ export default function SafeBot() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const lastRouteKeyRef = useRef<string>('');
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -80,6 +87,39 @@ export default function SafeBot() {
     setTimeout(() => scrollToBottom(), 0);
     if (isOpen && inputRef.current) inputRef.current.focus();
   }, [mode, isOpen]);
+
+  useEffect(() => {
+    const from = (routeContext?.from || '').trim();
+    const to = (routeContext?.to || '').trim();
+    const score = typeof routeContext?.safetyScore === 'number' ? Math.round(routeContext.safetyScore) : null;
+    const routeKey = JSON.stringify({ from, to, score });
+
+    if (!lastRouteKeyRef.current) {
+      lastRouteKeyRef.current = routeKey;
+      return;
+    }
+
+    if (routeKey === lastRouteKeyRef.current) return;
+    lastRouteKeyRef.current = routeKey;
+
+    abortRef.current?.abort();
+    setIsTyping(false);
+
+    const routeText =
+      from || to
+        ? `Route updated: ${from ? `From "${from}"` : 'From (not set)'} → ${to ? `To "${to}"` : 'To (not set)'}`
+        : 'Route cleared.';
+    const scoreText = score === null ? 'Safety Score: (unknown)' : `Safety Score: ${Math.max(0, Math.min(100, score))}/100`;
+
+    const botMessage: Message = {
+      id: `${Date.now()}-route`,
+      text: `${routeText}\n${scoreText}\n\nAsk me again and I’ll reply using this updated route.`,
+      sender: 'bot',
+      timestamp: new Date(),
+    };
+
+    setConversations((prev) => ({ ...prev, [mode]: [...prev[mode], botMessage] }));
+  }, [routeContext?.from, routeContext?.to, routeContext?.safetyScore, mode]);
 
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
@@ -111,7 +151,15 @@ export default function SafeBot() {
       const res = await fetch('/api/safebot/chat', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ messages: chatMessages, mode }),
+        body: JSON.stringify({
+          messages: chatMessages,
+          mode,
+          context: {
+            from: routeContext?.from,
+            to: routeContext?.to,
+            safetyScore: routeContext?.safetyScore,
+          },
+        }),
         signal: controller.signal,
       });
 

@@ -64,6 +64,12 @@ Always act like you are travelling WITH the user in real time.
 type ChatRole = "user" | "assistant";
 type ChatMessage = { role: ChatRole; content: string };
 
+type RouteContext = {
+  from?: string;
+  to?: string;
+  safetyScore?: number;
+};
+
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
@@ -83,7 +89,28 @@ export async function POST(req: Request) {
 
     const modeRaw = body?.mode;
     const mode: BotMode = modeRaw === "neighbor" || modeRaw === "agent" || modeRaw === "friend" ? modeRaw : "agent";
-    const systemPrompt = SYSTEM_PROMPTS[mode];
+    const systemPromptBase = SYSTEM_PROMPTS[mode];
+
+    const ctxRaw: RouteContext | undefined = body?.context && typeof body.context === "object" ? body.context : undefined;
+    const from = typeof ctxRaw?.from === "string" ? ctxRaw.from.trim() : "";
+    const to = typeof ctxRaw?.to === "string" ? ctxRaw.to.trim() : "";
+    const safetyScore =
+      typeof ctxRaw?.safetyScore === "number" && Number.isFinite(ctxRaw.safetyScore) ? Math.round(ctxRaw.safetyScore) : undefined;
+
+    const scoreClamped = typeof safetyScore === "number" ? Math.max(0, Math.min(100, safetyScore)) : undefined;
+
+    const routeContextLines = [
+      "Current trip context (use this in your answer even if the user forgets):",
+      from ? `- From: ${from}` : "- From: (not provided)",
+      to ? `- To: ${to}` : "- To: (not provided)",
+      typeof scoreClamped === "number" ? `- Route Safety Score: ${scoreClamped}/100` : "- Route Safety Score: (unknown)",
+      "IMPORTANT RULES ABOUT THE SCORE:",
+      "- This Route Safety Score is provided by the app. Treat it as a fixed value.",
+      "- Do NOT recalculate, change, or estimate a different number.",
+      "- When you mention the score, repeat it EXACTLY as given above (or say it's unknown).",
+    ].join("\n");
+
+    const systemPrompt = `${systemPromptBase}\n\n${routeContextLines}`;
 
     const messages: ChatMessage[] = messagesRaw
       .filter((m: any) => m && (m.role === "user" || m.role === "assistant"))
