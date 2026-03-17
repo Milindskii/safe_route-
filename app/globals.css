@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-primary-dark text-text-dark;
+  }
+  
+  .dark body {
+    @apply bg-primary-dark text-text-dark;
+  }
+
+  body:not(.dark) {
+    @apply bg-primary-light text-text-light;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply backdrop-blur-[20px] border rounded-[14px] shadow-[0_4px_24px_rgba(0,0,0,0.12)];
+  }
+  
+  .dark .glass-card {
+    @apply bg-surface-dark/60 border-accent/10;
+  }
+
+  .glass-card-light {
+    @apply bg-white/70 border-black/5 backdrop-blur-[20px] rounded-[14px] shadow-[0_4px_24px_rgba(0,0,0,0.12)];
+  }
+
+  .btn-primary {
+    @apply bg-accent text-primary-dark font-syne font-semibold tracking-[0.04em] px-7 py-3.5 rounded-lg transition-all duration-300 relative overflow-hidden;
+  }
+
+  .input-floating {
+    @apply w-full bg-transparent border border-text-muted/30 rounded-lg px-4 py-3.5 font-lora focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all;
+  }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+}
