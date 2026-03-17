@@ -25,6 +25,7 @@ export default function SafeBot() {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -54,26 +55,61 @@ export default function SafeBot() {
     setInputValue('');
     setIsTyping(true);
 
-    // Simulate bot response
-    setTimeout(() => {
-      const botResponses = [
-        "I can help you find the safest route. Where would you like to go?",
-        "Based on current data, the well-lit path is 2 blocks east.",
-        "There's heavy foot traffic on Main Street right now.",
-        "I've analyzed the area and found 3 safe routes for you.",
-        "Would you like me to show you the safety heatmap for this area?",
-      ];
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    try {
+      const chatMessages = [...messages, userMessage]
+        .filter((m) => m.text.trim().length > 0)
+        .map((m) => ({
+          role: m.sender === 'user' ? 'user' : 'assistant',
+          content: m.text,
+        }));
+
+      const res = await fetch('/api/safebot/chat', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ messages: chatMessages }),
+        signal: controller.signal,
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const errText =
+          typeof data?.error === 'string'
+            ? data.error
+            : 'Sorry, I hit a problem talking to the guide service.';
+        throw new Error(errText);
+      }
+
+      const botText =
+        typeof data?.reply === 'string' && data.reply.trim().length > 0
+          ? data.reply
+          : "I didn't catch that — can you say it again?";
 
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: botResponses[Math.floor(Math.random() * botResponses.length)],
+        text: botText,
         sender: 'bot',
         timestamp: new Date(),
       };
 
       setMessages((prev) => [...prev, botMessage]);
+    } catch (e: any) {
+      const isAbort = e?.name === 'AbortError';
+      const botMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: isAbort
+          ? 'Hold on — I got a newer message from you. Tell me again in one line?'
+          : `I’m having trouble reaching the guide right now. Make sure Ollama is running, then try again.\n\n(${e?.message || 'Request failed'})`,
+        sender: 'bot',
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, botMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
