@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Bot, X, MessageCircle, Mic, Volume2 } from 'lucide-react';
+import { Send, Bot, X, MessageCircle, ChevronDown, Users, Map, Sparkles } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -11,16 +11,49 @@ interface Message {
   timestamp: Date;
 }
 
+type BotMode = 'neighbor' | 'agent' | 'friend';
+
+const MODE_META: Record<BotMode, { label: string; short: string; placeholder: string; icon: React.ReactNode; greeting: string }> = {
+  neighbor: {
+    label: 'Travel Neighbour',
+    short: 'Neighbour',
+    placeholder: 'Ask what to carry, hydration, problems...',
+    icon: <Users className="w-4 h-4" />,
+    greeting:
+      "Hey! I’m right here with you. Tell me where we’re heading and what time — I’ll help you pack smart, stay hydrated, and handle any travel issues on the way.",
+  },
+  agent: {
+    label: 'Travel Agent',
+    short: 'Agent',
+    placeholder: 'Ask for safe routing, lighting, accident zones...',
+    icon: <Map className="w-4 h-4" />,
+    greeting:
+      "Alright, tell me your start point, destination, and time. I’ll guide you with a safer route — well-lit, busy stretches, and fewer risky spots.",
+  },
+  friend: {
+    label: 'Travel Friend',
+    short: 'Friend',
+    placeholder: 'Chat while traveling, get place recommendations...',
+    icon: <Sparkles className="w-4 h-4" />,
+    greeting:
+      "Hey! I’m with you. Where are we exploring today? I’ll keep you company and suggest nice, safe spots to check out nearby.",
+  },
+};
+
 export default function SafeBot() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: "Hello! I'm your safety assistant. How can I help you navigate safely today?",
-      sender: 'bot',
-      timestamp: new Date(),
-    },
-  ]);
+  const [mode, setMode] = useState<BotMode>('agent');
+  const [isModeMenuOpen, setIsModeMenuOpen] = useState(false);
+  const [conversations, setConversations] = useState<Record<BotMode, Message[]>>(() => {
+    const now = new Date();
+    return {
+      neighbor: [{ id: 'neighbor-1', text: MODE_META.neighbor.greeting, sender: 'bot', timestamp: now }],
+      agent: [{ id: 'agent-1', text: MODE_META.agent.greeting, sender: 'bot', timestamp: now }],
+      friend: [{ id: 'friend-1', text: MODE_META.friend.greeting, sender: 'bot', timestamp: now }],
+    };
+  });
+
+  const messages = conversations[mode];
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -41,6 +74,13 @@ export default function SafeBot() {
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    setIsModeMenuOpen(false);
+    // scroll on mode change so the conversation is visible immediately
+    setTimeout(() => scrollToBottom(), 0);
+    if (isOpen && inputRef.current) inputRef.current.focus();
+  }, [mode, isOpen]);
+
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
 
@@ -51,7 +91,7 @@ export default function SafeBot() {
       timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    setConversations((prev) => ({ ...prev, [mode]: [...prev[mode], userMessage] }));
     setInputValue('');
     setIsTyping(true);
 
@@ -60,7 +100,8 @@ export default function SafeBot() {
     abortRef.current = controller;
 
     try {
-      const chatMessages = [...messages, userMessage]
+      const currentMessages = [...messages, userMessage];
+      const chatMessages = currentMessages
         .filter((m) => m.text.trim().length > 0)
         .map((m) => ({
           role: m.sender === 'user' ? 'user' : 'assistant',
@@ -70,7 +111,7 @@ export default function SafeBot() {
       const res = await fetch('/api/safebot/chat', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ messages: chatMessages }),
+        body: JSON.stringify({ messages: chatMessages, mode }),
         signal: controller.signal,
       });
 
@@ -95,7 +136,7 @@ export default function SafeBot() {
         timestamp: new Date(),
       };
 
-      setMessages((prev) => [...prev, botMessage]);
+      setConversations((prev) => ({ ...prev, [mode]: [...prev[mode], botMessage] }));
     } catch (e: any) {
       const isAbort = e?.name === 'AbortError';
       const botMessage: Message = {
@@ -106,7 +147,7 @@ export default function SafeBot() {
         sender: 'bot',
         timestamp: new Date(),
       };
-      setMessages((prev) => [...prev, botMessage]);
+      setConversations((prev) => ({ ...prev, [mode]: [...prev[mode], botMessage] }));
     } finally {
       setIsTyping(false);
     }
@@ -205,16 +246,60 @@ export default function SafeBot() {
             {/* Input */}
             <div className="p-4 border-t border-border bg-surface">
               <div className="flex items-center gap-2">
-                <button className="p-2 hover:bg-surface-hover rounded-full transition-colors">
-                  <Mic className="w-5 h-5 text-text-secondary" />
-                </button>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setIsModeMenuOpen((v) => !v)}
+                    className="p-2 hover:bg-surface-hover rounded-full transition-colors flex items-center gap-2"
+                    aria-haspopup="menu"
+                    aria-expanded={isModeMenuOpen}
+                    title={`Mode: ${MODE_META[mode].label}`}
+                  >
+                    <span className="text-text-secondary">{MODE_META[mode].icon}</span>
+                    <ChevronDown className="w-4 h-4 text-text-secondary" />
+                  </button>
+
+                  <AnimatePresence>
+                    {isModeMenuOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute bottom-12 left-0 w-56 bg-surface border border-border rounded-xl shadow-xl overflow-hidden z-50"
+                        role="menu"
+                      >
+                        {(['neighbor', 'agent', 'friend'] as BotMode[]).map((m) => {
+                          const active = m === mode;
+                          return (
+                            <button
+                              key={m}
+                              type="button"
+                              onClick={() => setMode(m)}
+                              className={`w-full px-3 py-2 flex items-center gap-2 text-left hover:bg-surface-hover transition-colors ${
+                                active ? 'bg-accent/10' : ''
+                              }`}
+                              role="menuitem"
+                            >
+                              <span className={active ? 'text-accent' : 'text-text-secondary'}>{MODE_META[m].icon}</span>
+                              <div className="flex flex-col">
+                                <span className="text-sm font-syne font-semibold text-text-primary">{MODE_META[m].label}</span>
+                                <span className="text-[11px] text-text-secondary">{MODE_META[m].placeholder}</span>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
                 <input
                   ref={inputRef}
                   type="text"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Ask about safe routes..."
+                  placeholder={MODE_META[mode].placeholder}
                   className="flex-1 bg-background border border-border rounded-full px-4 py-2 text-text-primary placeholder-text-secondary/50 focus:outline-none focus:border-accent"
                 />
                 <button
