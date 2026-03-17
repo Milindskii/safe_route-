@@ -6,6 +6,7 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Shield, Search, Navigation, MapPin, Info, Plus, Minus, RotateCcw, Sun, Moon, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import SafeBot from '../landing/SafeBot';
 
 // Replace with your actual token
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || 'pk.eyJ1Ijoib3BlbmJ1aWxkZXIiLCJhIjoiY204Ym96Z29pMDBqZzJqcHh6Z29pMDBqZCJ9.YOUR_MAPBOX_ACCESS_TOKEN';
@@ -264,6 +265,7 @@ export default function MapPage() {
           </div>
         </motion.div>
       </div>
+      <SafeBot />
     </div>
   );
 }
