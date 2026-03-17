@@ -151,22 +151,26 @@ export default function MapPage() {
       </div>
 
       {/* Header Overlay */}
-      <div className="absolute top-6 left-6 right-6 z-20 flex justify-between items-start pointer-events-none">
-        <div className="flex flex-col gap-4 pointer-events-auto">
-          <Link href="/" className="glass-card p-3 flex items-center gap-2 hover:border-accent transition-colors group">
-            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-            <span className="font-syne text-sm uppercase tracking-widest">Back</span>
+      <div className="absolute top-6 left-6 right-6 z-20 flex justify-between items-center pointer-events-none">
+        <div className="flex items-center gap-4 pointer-events-auto">
+          <Link href="/" className="bg-surface/80 backdrop-blur-md border border-border p-3 rounded-xl flex items-center gap-2 hover:border-accent transition-all group shadow-lg">
+            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform text-text-primary" />
+            <span className="font-syne text-xs uppercase tracking-widest text-text-primary">Back to Home</span>
           </Link>
           
-          <div className="flex items-center gap-2 px-3 py-1.5 glass-card w-fit">
+          <div className="hidden sm:flex items-center gap-2 px-4 py-2.5 bg-surface/80 backdrop-blur-md border border-border rounded-xl shadow-lg">
             <div className="w-2 h-2 bg-safe rounded-full animate-pulse" />
-            <span className="font-syne text-[10px] uppercase tracking-[0.2em]">Live Safety Map — Beta</span>
+            <span className="font-syne text-[10px] uppercase tracking-[0.2em] text-text-primary">Live Safety Intelligence</span>
           </div>
         </div>
 
-        <div className="pointer-events-auto">
-          <button onClick={toggleTheme} className="glass-card p-3 hover:border-accent transition-colors">
-            {isDark ? <Sun className="w-5 h-5 text-accent" /> : <Moon className="w-5 h-5" />}
+        <div className="pointer-events-auto flex items-center gap-3">
+          <div className="hidden md:flex flex-col items-end mr-2">
+            <span className="font-syne text-[10px] uppercase tracking-tighter text-text-secondary">Current Region</span>
+            <span className="font-playfair text-sm text-text-primary font-bold">New York City, NY</span>
+          </div>
+          <button onClick={toggleTheme} className="bg-surface/80 backdrop-blur-md border border-border p-3 rounded-xl hover:border-accent transition-all shadow-lg group">
+            {isDark ? <Sun className="w-5 h-5 text-accent group-hover:rotate-45 transition-transform" /> : <Moon className="w-5 h-5 text-accent group-hover:-rotate-12 transition-transform" />}
           </button>
         </div>
       </div>
@@ -183,34 +187,57 @@ export default function MapPage() {
           <div ref={mapContainer} className="w-full h-full" />
 
           {/* Floating Search Card */}
-          <div className="absolute top-6 left-6 w-full max-w-sm pointer-events-none">
-            <div className="glass-card p-6 pointer-events-auto space-y-4 border-accent/20">
-              <div className="space-y-2">
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-                  <input 
-                    type="text" 
-                    placeholder="Starting point..."
-                    value={searchFrom}
-                    onChange={(e) => setSearchFrom(e.target.value)}
-                    className="w-full bg-primary-dark/40 border border-white/10 rounded-lg pl-10 pr-4 py-2.5 font-jetbrains text-xs focus:outline-none focus:border-accent transition-all"
-                  />
+          <div className="absolute top-8 left-8 w-full max-w-sm pointer-events-none">
+            <motion.div 
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="bg-background/90 backdrop-blur-xl p-8 rounded-2xl pointer-events-auto space-y-6 border border-border shadow-2xl"
+            >
+              <div className="space-y-1">
+                <h3 className="font-playfair text-xl text-text-primary">Plan Your Route</h3>
+                <p className="text-[10px] uppercase tracking-widest text-text-secondary">AI-Optimized for safety & lighting</p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[9px] uppercase tracking-[0.2em] text-text-secondary ml-1">Starting From</label>
+                  <div className="relative group">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary group-focus-within:text-accent transition-colors" />
+                    <input 
+                      type="text" 
+                      placeholder="Enter location..."
+                      value={searchFrom}
+                      onChange={(e) => setSearchFrom(e.target.value)}
+                      className="w-full bg-surface/50 border border-border rounded-xl pl-10 pr-4 py-3 font-jetbrains text-xs text-text-primary focus:outline-none focus:border-accent focus:ring-4 focus:ring-accent/5 transition-all"
+                    />
+                  </div>
                 </div>
-                <div className="relative">
-                  <Navigation className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-                  <input 
-                    type="text" 
-                    placeholder="Destination..."
-                    value={searchTo}
-                    onChange={(e) => setSearchTo(e.target.value)}
-                    className="w-full bg-primary-dark/40 border border-white/10 rounded-lg pl-10 pr-4 py-2.5 font-jetbrains text-xs focus:outline-none focus:border-accent transition-all"
-                  />
+
+                <div className="flex justify-center -my-2 opacity-30">
+                  <div className="w-[1px] h-4 bg-border" />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[9px] uppercase tracking-[0.2em] text-text-secondary ml-1">Destination</label>
+                  <div className="relative group">
+                    <Navigation className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary group-focus-within:text-safe transition-colors" />
+                    <input 
+                      type="text" 
+                      placeholder="Where to?"
+                      value={searchTo}
+                      onChange={(e) => setSearchTo(e.target.value)}
+                      className="w-full bg-surface/50 border border-border rounded-xl pl-10 pr-4 py-3 font-jetbrains text-xs text-text-primary focus:outline-none focus:border-safe focus:ring-4 focus:ring-safe/5 transition-all"
+                    />
+                  </div>
                 </div>
               </div>
-              <button className="btn-primary w-full py-3 text-xs flex items-center justify-center gap-2">
-                <Search className="w-4 h-4" /> Find Safe Route
+
+              <button className="w-full bg-accent hover:bg-accent-hover text-background font-syne font-bold py-4 rounded-xl shadow-lg shadow-accent/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group">
+                <Search className="w-4 h-4 group-hover:rotate-12 transition-transform" /> 
+                <span className="uppercase tracking-[0.1em] text-xs">Analyze Safety Route</span>
               </button>
-            </div>
+            </motion.div>
           </div>
 
           {/* Safety Score Badge */}
